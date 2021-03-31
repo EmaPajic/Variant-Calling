@@ -4,7 +4,7 @@ class VariantCaller(object):
     def __init__(self):
         pass
 
-    def __choose_variant__(self, candidate_base_count, error_probability):
+    def __calculate_most_probable_variant__(self, candidate_base_count, error_probability):
         """
         Given two most common bases b and b', we want to calculate the likelihood of each possible variant
         P(variant | reads) = P(reads | variant) * P(variant) / P(reads)
@@ -31,11 +31,11 @@ class VariantCaller(object):
         total_likelihood = np.exp(first_base_log_likelihood) + np.exp(second_base_log_likelihood) + np.exp(diploidy_log_likelihood)
 
         if first_base_log_likelihood >= second_base_log_likelihood and first_base_log_likelihood >= diploidy_log_likelihood:
-            return (first_candidate_base, np.exp(first_base_log_likelihood) / total_likelihood)
+            return ([first_candidate_base], np.exp(first_base_log_likelihood) / total_likelihood)
         elif second_base_log_likelihood >= first_base_log_likelihood and second_base_log_likelihood >= diploidy_log_likelihood:
-            return (second_candidate_base, np.exp(second_base_log_likelihood) / total_likelihood)
+            return ([second_candidate_base], np.exp(second_base_log_likelihood) / total_likelihood)
         else:
-            return (first_candidate_base + second_candidate_base, np.exp(diploidy_log_likelihood) / total_likelihood)
+            return ([first_candidate_base, second_candidate_base], np.exp(diploidy_log_likelihood) / total_likelihood)
         
 
     def call_variant(self, genomePositionInfo, error_probability = None):
@@ -49,19 +49,44 @@ class VariantCaller(object):
         candidate_bases = sorted(base_count, key=base_count.get, reverse=True)[:2]
         candidate_base_count = [ (base, base_count[base]) for base in candidate_bases ]
 
-        return self.__choose_variant__(candidate_base_count, error_probability)
+        most_probable_variant, confidence = self.__calculate_most_probable_variant__(candidate_base_count, error_probability)
+
+        genomePositionInfo['info'] = '.'
+        genomePositionInfo['format'] = 'GT:VAF'
+        
+        ref_base_present = len([base for base in most_probable_variant if base == genomePositionInfo['ref_base']]) == 1
+        alt_bases = [base for base in most_probable_variant if base != genomePositionInfo['ref_base']]
+        if len(alt_bases) == 0:
+            genomePositionInfo['alt'] = '.'
+            return
+        if ref_base_present:
+            genomePositionInfo['genotype'] = (0, 1)
+        else:
+            if len(alt_bases) == 1:
+                genomePositionInfo['genotype'] = (1, 1)
+            else:
+                genomePositionInfo['genotype'] = (1, 2)
+        genomePositionInfo['alt'] = alt_bases
+        genomePositionInfo['confidence'] = confidence
 
 def main():
-    mockPositionInfo = { 'A' : 1, 'G' : 2, 'C' : 1, 'T' : 8 }
     variant_caller = VariantCaller()
-    variant, probability = variant_caller.call_variant(mockPositionInfo)
-    print(variant, probability)
-    assert(variant == 'TG')
 
-    mockPositionInfo = { 'A' : 8, 'G' : 1, 'C' : 1, 'T' : 1 }
-    variant, probability = variant_caller.call_variant(mockPositionInfo, 0.2)
-    print(variant, probability)
-    assert(variant == 'A')
+    mockPositionInfo = { 'A' : 8, 'G' : 1, 'C' : 1, 'T' : 1 , 'ref_base' : 'A'}
+    variant_caller.call_variant(mockPositionInfo, 0.2)
+    assert(mockPositionInfo['alt'] == '.')
+
+    mockPositionInfo = { 'A' : 1, 'G' : 2, 'C' : 1, 'T' : 8 , 'ref_base' : 'G'}
+    variant_caller.call_variant(mockPositionInfo)
+    assert(mockPositionInfo['genotype'] == (0, 1))
+    assert(mockPositionInfo['alt'] == ['T'])
+
+    
+    mockPositionInfo = { 'A' : 1, 'G' : 2, 'C' : 1, 'T' : 8 , 'ref_base' : 'A'}
+    variant_caller.call_variant(mockPositionInfo)
+    assert(mockPositionInfo['genotype'] == (1, 2))
+    assert(mockPositionInfo['alt'] == ['T', 'G'])
+
 
 if __name__ == "__main__":
     main()
