@@ -48,7 +48,7 @@ class VariantCaller(object):
             for insertion_string, insertion_count in genomePositionInfo['insertions']:
                 variant_count[insertion_string] = insertion_count
         if 'deletitions' in genomePositionInfo:
-            for deletition_string, deletition_string in genomePositionInfo['deletitions']:
+            for deletition_string, deletition_count in genomePositionInfo['deletitions']:
                 variant_count[deletition_string] = deletition_count
         
         # Only keep two most likely bases
@@ -58,12 +58,11 @@ class VariantCaller(object):
         most_probable_variant, confidence = self.__calculate_most_probable_variant__(candidate_variant_count, error_probability)
 
         genomePositionInfo['info'] = '.'
-        genomePositionInfo['format'] = 'GT:VAF'
         
         ref_base_present = len([base for base in most_probable_variant if base == genomePositionInfo['ref_base']]) == 1
         alt_bases = [base for base in most_probable_variant if base != genomePositionInfo['ref_base']]
         if len(alt_bases) == 0:
-            genomePositionInfo['alt'] = '.'
+            genomePositionInfo['alts'] = '.'
             return
         if ref_base_present:
             genomePositionInfo['genotype'] = (0, 1)
@@ -72,8 +71,8 @@ class VariantCaller(object):
                 genomePositionInfo['genotype'] = (1, 1)
             else:
                 genomePositionInfo['genotype'] = (1, 2)
-        genomePositionInfo['alt'] = alt_bases
-        genomePositionInfo['confidence'] = confidence
+        genomePositionInfo['alts'] = alt_bases
+        genomePositionInfo['vaf'] = confidence
 
 def main():
     variant_caller = VariantCaller()
@@ -87,7 +86,6 @@ def main():
     assert(mockPositionInfo['genotype'] == (0, 1))
     assert(mockPositionInfo['alt'] == ['T'])
 
-    
     mockPositionInfo = { 'A' : 1, 'G' : 2, 'C' : 1, 'T' : 8 , 'ref_base' : 'A'}
     variant_caller.call_variant(mockPositionInfo)
     assert(mockPositionInfo['genotype'] == (1, 2))
