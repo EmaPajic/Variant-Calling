@@ -74,11 +74,11 @@ def pileup_reader(path):
             read_bases = preprocess_bases(pileup_line['read_bases'])
             
             ins = re.findall(r'[\.][+][ACGT]*[0-9]*[ACGT]*[0-9]*[ACGT]*', read_bases)
-            dele = re.findall(r'[\.][-][ACGT]*[0-9]*[ACGT]*[0-9]*[ACGT]*', read_bases)
+            dels = re.findall(r'[\.][-][ACGT]*[0-9]*[ACGT]*[0-9]*[ACGT]*', read_bases)
             var_insertion = []
             var_deletition = []
             insertion_variants = list(set(ins))
-            deletition_variants = list(set(dele))
+            deletition_variants = list(set(dels))
             
             insertion_variants1 = [get_indel_string(var) for var in insertion_variants]
             deletition_variants1 = [get_indel_string(var) for var in deletition_variants]
@@ -87,7 +87,7 @@ def pileup_reader(path):
             for i in range(0, len(insertion_variants1)):
                 var_insertion.append([insertion_variants1[i], var_counts_insertion[i]])
                 
-            var_counts_deletition = [dele.count(indel) for indel in deletition_variants]
+            var_counts_deletition = [dels.count(indel) for indel in deletition_variants]
             for i in range(0, len(deletition_variants1)):
                 var_deletition.append([deletition_variants1[i], var_counts_deletition[i]])
             
