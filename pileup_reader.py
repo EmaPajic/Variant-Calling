@@ -112,5 +112,5 @@ def pileup_reader(path):
             
                 
 if __name__ == '__main__':
-    for item in pileup_reader('/home/user/Desktop/EmaPajic/Variant-Calling/merged-normal.pileup'):
+    for item in pileup_reader('merged-normal.pileup'):
         print(item)
