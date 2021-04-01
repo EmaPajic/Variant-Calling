@@ -56,8 +56,6 @@ class VariantCaller(object):
         candidate_variant_count = [(variant, variant_count[variant]) for variant in candidate_variants]
 
         most_probable_variant, confidence = self.__calculate_most_probable_variant__(candidate_variant_count, error_probability)
-
-        genomePositionInfo['info'] = '.'
         
         ref_base_present = len([base for base in most_probable_variant if base == genomePositionInfo['ref_base']]) == 1
         alt_bases = [base for base in most_probable_variant if base != genomePositionInfo['ref_base']]
@@ -71,6 +69,11 @@ class VariantCaller(object):
                 genomePositionInfo['genotype'] = (1, 1)
             else:
                 genomePositionInfo['genotype'] = (1, 2)
+
+        genomePositionInfo['info'] = '.'
+        if len([base for base in alt_bases if len(base) > 1]) > 0:
+            genomePositionInfo['info'] = 'INDEL'
+
         genomePositionInfo['alts'] = alt_bases
         genomePositionInfo['vaf'] = confidence
 
