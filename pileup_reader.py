@@ -58,7 +58,7 @@ def pileup_reader(path):
             
             pileup_line = {}
             pileup_line['chromosome'] = split_line[0]
-            pileup_line['position'] = split_line[1]
+            pileup_line['position'] = int(split_line[1])
             pileup_line['ref_base'] = split_line[2]
             pileup_line['read_count'] = int(split_line[3])
             pileup_line['read_bases'] = split_line[4]

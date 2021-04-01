@@ -59,8 +59,12 @@ class VariantCaller(object):
         
         ref_base_present = len([base for base in most_probable_variant if base == genomePositionInfo['ref_base']]) == 1
         alt_bases = [base for base in most_probable_variant if base != genomePositionInfo['ref_base']]
+        
+        genomePositionInfo['vaf'] = confidence
         if len(alt_bases) == 0:
+            genomePositionInfo['genotype'] = (0, 0)
             genomePositionInfo['alts'] = '.'
+            
             return
         if ref_base_present:
             genomePositionInfo['genotype'] = (0, 1)
@@ -75,7 +79,7 @@ class VariantCaller(object):
             genomePositionInfo['info'] = 'INDEL'
 
         genomePositionInfo['alts'] = alt_bases
-        genomePositionInfo['vaf'] = confidence
+        
 
 def main():
     variant_caller = VariantCaller()
