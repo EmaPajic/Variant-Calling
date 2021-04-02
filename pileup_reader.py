@@ -117,8 +117,7 @@ def pileup_reader(path):
             for base in base_counter:
                 pileup_line[base[0]] = base[1]
             
-            if len(insertion_variants) != 0:
-                yield pileup_line
+            yield pileup_line
             
                 
 if __name__ == '__main__':
