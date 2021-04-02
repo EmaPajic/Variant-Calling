@@ -73,7 +73,7 @@ class VariantCaller(object):
             else:
                 genomePositionInfo['genotype'] = (1, 2)
 
-        # TODO: Add comments and tests for INDEL ref and alts forming (everything below)
+        # TODO: Add comments for INDEL ref and alts forming (everything below)
         alt_variant_types = [variant[1] for variant in most_probable_variant if variant[0] != genomePositionInfo['ref_base']]
 
         for position in range(len(alt_variants)):
@@ -85,14 +85,14 @@ class VariantCaller(object):
             if alt_variant_types[position] == 'DEL':
                 if len(alt_variants[position]) > len(longest_deletition_string):
                     longest_deletition_string = alt_variants[position]
-        
-        genomePositionInfo['ref_base'] = genomePositionInfo['ref_base'] + longest_deletition_string
+
         for position in range(len(alt_variants)):
             if alt_variant_types[position] != 'DEL':
                 alt_variants[position] += longest_deletition_string
             else:
-                shortest_deletition_len = len(alt_variants[position]) 
-                alt_variants[position] += longest_deletition_string[shortest_deletition_len:]
+                shorter_deletition_len = len(alt_variants[position])
+                alt_variants[position] = genomePositionInfo['ref_base'] + longest_deletition_string[shorter_deletition_len:]
+        genomePositionInfo['ref_base'] = genomePositionInfo['ref_base'] + longest_deletition_string
 
         genomePositionInfo['alts'] = alt_variants
         
