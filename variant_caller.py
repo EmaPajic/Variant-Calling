@@ -43,37 +43,58 @@ class VariantCaller(object):
             # Deduce error probability from quality
             error_probability = 0.001
         
-        variant_count = { base: genomePositionInfo[base] for base in {'A', 'G', 'C', 'T'} }
+        variant_count = { (base, 'SNV'): genomePositionInfo[base] for base in {'A', 'G', 'C', 'T'} }
         if 'insertions' in genomePositionInfo:
             for insertion_string, insertion_count in genomePositionInfo['insertions']:
-                variant_count[insertion_string] = insertion_count
+                variant_count[(insertion_string, 'INS')] = insertion_count
         if 'deletitions' in genomePositionInfo:
             for deletition_string, deletition_count in genomePositionInfo['deletitions']:
-                variant_count[deletition_string] = deletition_count
+                variant_count[(deletition_string, 'DEL')] = deletition_count
         
         # Only keep two most likely bases
         candidate_variants = sorted(variant_count, key=variant_count.get, reverse=True)[:2]
         candidate_variant_count = [(variant, variant_count[variant]) for variant in candidate_variants]
 
         most_probable_variant, confidence = self.__calculate_most_probable_variant__(candidate_variant_count, error_probability)
-        
-        ref_base_present = len([base for base in most_probable_variant if base == genomePositionInfo['ref_base']]) == 1
-        alt_bases = [base for base in most_probable_variant if base != genomePositionInfo['ref_base']]
-        
+
+        ref_variant_present = len([variant[0] for variant in most_probable_variant if variant[0] == genomePositionInfo['ref_base']]) == 1
+        alt_variants = [variant[0] for variant in most_probable_variant if variant[0] != genomePositionInfo['ref_base']]
+
         genomePositionInfo['vaf'] = confidence
-        if len(alt_bases) == 0:
+        if len(alt_variants) == 0:
             genomePositionInfo['genotype'] = (0, 0)
             genomePositionInfo['alts'] = '.'
             return
-        if ref_base_present:
+        if ref_variant_present:
             genomePositionInfo['genotype'] = (0, 1)
         else:
-            if len(alt_bases) == 1:
+            if len(alt_variants) == 1:
                 genomePositionInfo['genotype'] = (1, 1)
             else:
                 genomePositionInfo['genotype'] = (1, 2)
 
-        genomePositionInfo['alts'] = alt_bases
+        # TODO: Add comments and tests for INDEL ref and alts forming (everything below)
+        alt_variant_types = [variant[1] for variant in most_probable_variant if variant[0] != genomePositionInfo['ref_base']]
+
+        for position in range(len(alt_variants)):
+            if alt_variant_types[position] == 'INS':
+                alt_variants[position] = genomePositionInfo['ref_base'] + alt_variants[position]
+
+        longest_deletition_string = ''
+        for position in range(len(alt_variants)):
+            if alt_variant_types[position] == 'DEL':
+                if len(alt_variants[position]) > len(longest_deletition_string):
+                    longest_deletition_string = alt_variants[position]
+        
+        genomePositionInfo['ref_base'] = genomePositionInfo['ref_base'] + longest_deletition_string
+        for position in range(len(alt_variants)):
+            if alt_variant_types[position] != 'DEL':
+                alt_variants[position] += longest_deletition_string
+            else:
+                shortest_deletition_len = len(alt_variants[position]) 
+                alt_variants[position] += longest_deletition_string[shortest_deletition_len:]
+
+        genomePositionInfo['alts'] = alt_variants
         
 
 def main():
