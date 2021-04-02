@@ -16,9 +16,8 @@ def accuracy(tp, fp, fn, tn):
     return (tp + tn) / (tp + fp + tn + fn)
 
 def mcc(tp, fp, fn, tn):
-    return 1.0
     return (tp * tn - fp * fn) /\
-            np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+            np.sqrt(1.0 * (tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
           
             
 def get_statistics(bfctools_vcf_file, vcf_file):        
