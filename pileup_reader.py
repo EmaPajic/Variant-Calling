@@ -32,16 +32,25 @@ def get_indel_string(read_bases):
     indel_string = read_bases[2:]
     
     ind_num = [ind.end() for ind in (re.finditer(r'[A-Za-z\.,][0-9]*[^A-Za-z]', read_bases))]
-
+    
+    repeats = []
+    c = []
+    for i in range(len(ind_num)):
+        if read_bases[ind_num[i] + 1:ind_num[i] + 2].isnumeric():
+            repeats.append(int(read_bases[ind_num[i] + 1:ind_num[i] + 2]) + 10 * int(read_bases[ind_num[i]]))
+            c.append(1)
+        else:
+            repeats.append(int(read_bases[ind_num[i]]))
+            c.append(0)
+            
     if len(ind_num) > 0:
-        indel_string = read_bases[2:ind_num[0]]
-        
+        indel_string = read_bases[2 + c[0]:ind_num[0]]
         if len(ind_num) != 1:
-            for i in range(0,len(ind_num)-1):
-                indel_string += int(float(read_bases[ind_num[i]])) * \
-                                read_bases[ind_num[i]+1:ind_num[i+1]]
-        indel_string += int(float(read_bases[ind_num[-1]])) * \
-                        read_bases[ind_num[-1] + 1:]
+            for i in range(0, len(ind_num) - 1):
+                indel_string += repeats[i] * \
+                                read_bases[ind_num[i] + 1 + c[i]:ind_num[i + 1]]
+        indel_string += repeats[-1] * \
+                        read_bases[ind_num[-1] + 1 + c[-1]:]
 
     return indel_string
 
@@ -108,7 +117,8 @@ def pileup_reader(path):
             for base in base_counter:
                 pileup_line[base[0]] = base[1]
             
-            yield pileup_line
+            if len(insertion_variants) != 0:
+                yield pileup_line
             
                 
 if __name__ == '__main__':

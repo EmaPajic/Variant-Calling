@@ -18,7 +18,7 @@ class TestIndelString(unittest.TestCase):
         self.assertEqual(get_indel_string('.-1C'),'C')
         self.assertEqual(get_indel_string('.-2G'),'GG')
         self.assertEqual(get_indel_string('.+3CGC'),'CGCCGCCGC')         
-
+        self.assertEqual(get_indel_string('.-12G'),'GGGGGGGGGGGG')
 
 class TestPileupReader(unittest.TestCase):        
     def test_normal(self):
