@@ -64,7 +64,6 @@ class VariantCaller(object):
         if len(alt_bases) == 0:
             genomePositionInfo['genotype'] = (0, 0)
             genomePositionInfo['alts'] = '.'
-            
             return
         if ref_base_present:
             genomePositionInfo['genotype'] = (0, 1)
@@ -73,10 +72,6 @@ class VariantCaller(object):
                 genomePositionInfo['genotype'] = (1, 1)
             else:
                 genomePositionInfo['genotype'] = (1, 2)
-
-        genomePositionInfo['info'] = '.'
-        if len([base for base in alt_bases if len(base) > 1]) > 0:
-            genomePositionInfo['info'] = 'INDEL'
 
         genomePositionInfo['alts'] = alt_bases
         
