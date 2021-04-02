@@ -64,7 +64,7 @@ def pileup_reader(path):
             pileup_line['read_bases'] = split_line[4]
             pileup_line['qualities'] = split_line[5]
             
-            pileup_line['average_quality'] = get_average_quality(split_line[5])
+            #pileup_line['average_quality'] = get_average_quality(split_line[5])
             
             pileup_line['A'] = 0
             pileup_line['C'] = 0
