@@ -1,5 +1,6 @@
 import numpy as np
 import pysam
+import matplotlib.pyplot as plt
 
 def precision(tp, fp, fn):
     return tp / (tp + fp)
@@ -55,7 +56,13 @@ def get_statistics(bfctools_vcf_file, vcf_file):
     
 if __name__ == '__main__':
     bcftools_vcf_file = "merged-normal.bam.mpileup.vcf.called.vcf"
-    vcf_files = ["merged-normal.vcf"]
+    vcf_files = ["merged-normal.80.vcf", "merged-normal.99.vcf"]
+    
+    p = []
+    
+    for vcf_file in vcf_files:
+        info = vcf_file.split('.')
+        p.append(float(info[1]) / 100)
     
     TP = []
     FP = []
@@ -78,12 +85,46 @@ if __name__ == '__main__':
         f1_score_list.append(f1_score(tp, fp, fn))
         accuracy_list.append(accuracy(tp, fp, fn, tn))
         mcc_list.append(mcc(tp, fp, fn, tn))
-        
-    print(precision_list)
-    print(recall_list)
-    print(f1_score_list)
-    print(accuracy_list)
-    print(mcc_list)
+       
+    for i in range(len(vcf_files)):
+        print('Probability: {}'.format(p[i]))
+        print('Precision: {}'.format(precision_list[i]))
+        print('Recall: {}'.format(recall_list[i]))
+        print('F1 score: {}'.format(f1_score_list[i]))
+        print('Accuracy: {}'.format(accuracy_list[i]))
+        print('MCC score: {}'.format(mcc_list[i]))
+        print('')
+    
+    plt.figure('Precision')
+    plt.title('Precision')
+    plt.xlabel('Probability')
+    plt.ylabel('Precision')
+    plt.plot(p, precision_list)
+    
+    plt.figure('Recall')
+    plt.title('Recall')
+    plt.xlabel('Probability')
+    plt.ylabel('Recall')
+    plt.plot(p, recall_list)
+    
+    plt.figure('F1 score')
+    plt.title('F1 score')
+    plt.xlabel('Probability')
+    plt.ylabel('F1 score')
+    plt.plot(p, f1_score_list)
+    
+    plt.figure('Accuracy')
+    plt.title('Accuracy')
+    plt.xlabel('Probability')
+    plt.ylabel('Accuracy')
+    plt.plot(p, accuracy_list)
+    
+    plt.figure('MCC score')
+    plt.title('MCC score')
+    plt.xlabel('Probability')
+    plt.ylabel('MCC score')
+    plt.plot(p, mcc_list)
+    
           
     
     
