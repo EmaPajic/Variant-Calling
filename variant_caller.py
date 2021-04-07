@@ -36,9 +36,9 @@ class VariantCaller(object):
             return ([first_candidate_variant, second_candidate_variant], diploidy_likelihood / total_likelihood)
         
 
-    def call_variant(self, genomePositionInfo, correct_probability = None):
-        if correct_probability == None:
-            correct_probability = 0.99
+    def call_variant(self, genomePositionInfo, correct_probability = 0.8, use_read_quality = False):
+        if use_read_quality:
+            correct_probability = genomePositionInfo['average_quality']
         variant_count = { (base, 'SNV'): genomePositionInfo[base] for base in {'A', 'G', 'C', 'T'} }
         if 'insertions' in genomePositionInfo:
             for insertion_string, insertion_count in genomePositionInfo['insertions']:

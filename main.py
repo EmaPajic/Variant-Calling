@@ -38,7 +38,7 @@ def main():
 
     for pileup_line in pileup_reader(args.input_file):
         variant_caller_start = time.time()
-        variant_caller.call_variant(pileup_line, args.p)
+        variant_caller.call_variant(pileup_line, args.p, args.use_read_quality)
         if pileup_line['alts'] != '.':
             positions_with_variants += 1
         variant_caller_time += time.time() - variant_caller_start
