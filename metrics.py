@@ -56,13 +56,13 @@ def get_statistics(bfctools_vcf_file, vcf_file):
     
 if __name__ == '__main__':
     bcftools_vcf_file = "merged-normal.bam.mpileup.vcf.called.vcf"
-    vcf_files = ["merged-normal.80.vcf", "merged-normal.99.vcf"]
+    vcf_files = ["merged-normal.pileup.70.vcf", "merged-normal.pileup.80.vcf", "merged-normal.pileup.90.vcf", "merged-normal.pileup.95.vcf", "merged-normal.pileup.99.vcf"]
     
     p = []
     
     for vcf_file in vcf_files:
         info = vcf_file.split('.')
-        p.append(float(info[1]) / 100)
+        p.append(float(info[2]) / 100)
     
     TP = []
     FP = []
@@ -100,31 +100,35 @@ if __name__ == '__main__':
     plt.xlabel('Probability')
     plt.ylabel('Precision')
     plt.plot(p, precision_list)
+    plt.show()
     
     plt.figure('Recall')
     plt.title('Recall')
     plt.xlabel('Probability')
     plt.ylabel('Recall')
     plt.plot(p, recall_list)
+    plt.show()
     
     plt.figure('F1 score')
     plt.title('F1 score')
     plt.xlabel('Probability')
     plt.ylabel('F1 score')
     plt.plot(p, f1_score_list)
-    
+    plt.show()
+
     plt.figure('Accuracy')
     plt.title('Accuracy')
     plt.xlabel('Probability')
     plt.ylabel('Accuracy')
     plt.plot(p, accuracy_list)
-    
+    plt.show()
+
     plt.figure('MCC score')
     plt.title('MCC score')
     plt.xlabel('Probability')
     plt.ylabel('MCC score')
     plt.plot(p, mcc_list)
-    
+    plt.show()
           
     
     
