@@ -1,6 +1,9 @@
 import numpy as np
 import pysam
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sn
+
 
 def precision(tp, fp, fn):
     return tp / (tp + fp)
@@ -43,9 +46,9 @@ def get_statistics(bfctools_vcf_file, vcf_file):
         
         if genotype == (0, 0) and (record.chrom, record.pos) not in data_bcftools:
             tn += 1
-        elif genotype == (0, 0) and (record.chrom, record.pos) not in data_bcftools:
+        elif genotype == (0, 0) and (record.chrom, record.pos) in data_bcftools:
             fn += 1
-        elif genotype != (0, 0) and (record.chrom, record.pos) in data_bcftools:
+        elif genotype != (0, 0) and (record.chrom, record.pos) not in data_bcftools:
             fp += 1
         else:
             tp += 1
@@ -56,8 +59,9 @@ def get_statistics(bfctools_vcf_file, vcf_file):
     
 if __name__ == '__main__':
     bcftools_vcf_file = "merged-normal.bam.mpileup.vcf.called.vcf"
-    vcf_files = ["merged-normal.pileup.70.vcf", "merged-normal.pileup.80.vcf", "merged-normal.pileup.90.vcf", "merged-normal.pileup.95.vcf", "merged-normal.pileup.99.vcf"]
-    
+    vcf_files = ["merged-normal.pileup.70.vcf", "merged-normal.pileup.80.vcf",
+                 "merged-normal.pileup.90.vcf", "merged-normal.pileup.95.vcf",
+                 "merged-normal.pileup.99.vcf"]
     p = []
     
     for vcf_file in vcf_files:
@@ -94,6 +98,15 @@ if __name__ == '__main__':
         print('Accuracy: {}'.format(accuracy_list[i]))
         print('MCC score: {}'.format(mcc_list[i]))
         print('')
+        
+        confusion_matrix = np.array([[tn, fn],[fp, tp]])
+        confusion_matrix = confusion_matrix.astype(np.float) / confusion_matrix.sum(axis=1)[:, np.newaxis]
+        df_cm = pd.DataFrame(confusion_matrix, range(2), range(2))
+        plt.figure(i)
+        sn.set(font_scale=1.4)
+        sn.heatmap(df_cm, annot=True, annot_kws={"size": 16})
+        
+        plt.show() 
     
     plt.figure('Precision')
     plt.title('Precision')
@@ -129,7 +142,7 @@ if __name__ == '__main__':
     plt.ylabel('MCC score')
     plt.plot(p, mcc_list)
     plt.show()
-          
+         
     
     
         
