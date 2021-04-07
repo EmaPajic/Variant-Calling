@@ -59,9 +59,9 @@ def get_statistics(bfctools_vcf_file, vcf_file):
     
 if __name__ == '__main__':
     bcftools_vcf_file = "merged-normal.bam.mpileup.vcf.called.vcf"
-    vcf_files = ["merged-normal.pileup.70.vcf", "merged-normal.pileup.80.vcf",
-                 "merged-normal.pileup.90.vcf", "merged-normal.pileup.95.vcf",
-                 "merged-normal.pileup.99.vcf"]
+    vcf_files = ["merged-normal.pileup.50.vcf", "merged-normal.pileup.60.vcf",
+                 "merged-normal.pileup.70.vcf", "merged-normal.pileup.80.vcf",
+                 "merged-normal.pileup.90.vcf"]
     p = []
     
     for vcf_file in vcf_files:
@@ -142,9 +142,3 @@ if __name__ == '__main__':
     plt.ylabel('MCC score')
     plt.plot(p, mcc_list)
     plt.show()
-         
-    
-    
-        
-        
-        

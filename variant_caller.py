@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import binom
 
 class VariantCaller(object):
     def __init__(self):
@@ -12,36 +13,32 @@ class VariantCaller(object):
         
         If we have k v bases and n-k v' bases, and the correct probability for one read position of p:   
             P(reads | variant is v) = C_nk * p^k * (1 - p)^(n-k)
-            P(reads | variant is v') = C_nk * p^(n - k) * (1 - p)^(n - k)
-            P(reads | variant is vv') = C_nk / 2^n 
+            P(reads | variant is v') = C_nk * p^(n - k) * (1 - p)^k
+            P(reads | variant is vv') = C_nk * (1/2)^n
 
-        As we have C_nk at all positions, we should just compare the rest. We can do that easier if we take the natural log:
-            ln(P(reads | variant is v)) is proportional to k * ln(p) + (n-k) * ln(1-p)
-            ln(P(reads | variant is v')) is proportional to (n-k) * ln(p) + k * ln(1-p)
-            ln(P(reads | variant is vv')) is proportional to n * ln(1/2)
+        We can cross out the C_nk as it doesn't affect the comparison. 
         """
         first_candidate_variant, first_candidate_variant_count = candidate_variant_count[0]
         second_candidate_variant, second_candidate_variant_count = candidate_variant_count[1]
         n = first_candidate_variant_count + second_candidate_variant_count
         k = first_candidate_variant_count
 
-        first_variant_log_likelihood = k * np.log(correct_probability) + (n - k) * np.log(1 - correct_probability)
-        second_variant_log_likelihood = (n - k) * np.log(correct_probability) + k * np.log(1 - correct_probability)
-        diploidy_log_likelihood = n * np.log(0.5)
-        total_likelihood = np.exp(first_variant_log_likelihood) + np.exp(second_variant_log_likelihood) + np.exp(diploidy_log_likelihood)
+        first_variant_likelihood = correct_probability ** k * (1 - correct_probability) ** (n - k)
+        second_variant_likelihood = (1 - correct_probability) ** k * correct_probability ** (n - k)
+        diploidy_likelihood = (1/2) ** n
+        total_likelihood = first_variant_likelihood + second_variant_likelihood + diploidy_likelihood
 
-        if first_variant_log_likelihood >= second_variant_log_likelihood and first_variant_log_likelihood >= diploidy_log_likelihood:
-            return ([first_candidate_variant], np.exp(first_variant_log_likelihood) / total_likelihood)
-        elif second_variant_log_likelihood >= first_variant_log_likelihood and second_variant_log_likelihood >= diploidy_log_likelihood:
-            return ([second_candidate_variant], np.exp(second_variant_log_likelihood) / total_likelihood)
+        if first_variant_likelihood >= second_variant_likelihood and first_variant_likelihood >= diploidy_likelihood:
+            return ([first_candidate_variant], first_variant_likelihood / total_likelihood)
+        elif second_variant_likelihood >= first_variant_likelihood and second_variant_likelihood >= diploidy_likelihood:
+            return ([second_candidate_variant], second_variant_likelihood / total_likelihood)
         else:
-            return ([first_candidate_variant, second_candidate_variant], np.exp(diploidy_log_likelihood) / total_likelihood)
+            return ([first_candidate_variant, second_candidate_variant], diploidy_likelihood / total_likelihood)
         
 
     def call_variant(self, genomePositionInfo, correct_probability = None):
         if correct_probability == None:
             correct_probability = 0.99
-        
         variant_count = { (base, 'SNV'): genomePositionInfo[base] for base in {'A', 'G', 'C', 'T'} }
         if 'insertions' in genomePositionInfo:
             for insertion_string, insertion_count in genomePositionInfo['insertions']:
@@ -51,12 +48,25 @@ class VariantCaller(object):
                 variant_count[(deletition_string, 'DEL')] = deletition_count
         
         # Only keep two most likely bases
+        
         candidate_variants = sorted(variant_count, key=variant_count.get, reverse=True)[:2]
         candidate_variant_count = [(variant, variant_count[variant]) for variant in candidate_variants]
 
-        most_probable_variant, confidence = self.__calculate_most_probable_variant__(candidate_variant_count, correct_probability)
+        # Check if no candidate variant exists:
+        if candidate_variant_count[0][1] == 0:
+            genomePositionInfo['vaf'] = 1
+            genomePositionInfo['genotype'] = (0, 0)
+            genomePositionInfo['alts'] = '.'
+            return
 
-        ref_variant_present = len([variant[0] for variant in most_probable_variant if variant[0] == genomePositionInfo['ref_base']]) == 1
+        # Check if only one option exists and skip calculations
+        if candidate_variant_count[1][1] == 0:
+            most_probable_variant = [candidate_variant_count[0][0]]
+            confidence = 1
+        else:
+            most_probable_variant, confidence = self.__calculate_most_probable_variant__(candidate_variant_count, correct_probability)
+
+        ref_variant_present = len([variant[0] for variant in most_probable_variant if (variant[0] == genomePositionInfo['ref_base'] and variant[1] == 'SNV')]) > 0
         alt_variants = [variant[0] for variant in most_probable_variant if variant[0] != genomePositionInfo['ref_base']]
 
         genomePositionInfo['vaf'] = confidence
