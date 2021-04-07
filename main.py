@@ -14,8 +14,8 @@ def main():
                         help='path to input file in pileup format')
     parser.add_argument('--output-file', default='Make name from input name', type=str,
                         help='name for the output vcf file. If not given, will be created from input file name')
-    parser.add_argument('--p', default='0.01', type=float,
-                        help='probability estimate of one nucleotide read being incorrect, used by vc algorithm')
+    parser.add_argument('--p', default='0.99', type=float,
+                        help='probability estimate of one nucleotide read being correct, used by vc algorithm')
     parser.add_argument('--positions-to-call', default='10000', type=int,
                         help='how many positions to call if call-less-positions set to true')
     args = parser.parse_args()
@@ -41,12 +41,11 @@ def main():
         variant_caller.call_variant(pileup_line, args.p)
         if pileup_line['alts'] != '.':
             positions_with_variants += 1
-        variant_caller_end = time.time()
         variant_caller_time += time.time() - variant_caller_start
 
         write_vcf_start = time.time()
         write_vcf_line(pileup_line, vcf, sample)
-        write_vcf_time = time.time() - variant_caller_start
+        write_vcf_time = time.time() - write_vcf_start
 
         position_count += 1
         if args.call_less_positions and (position_count >= args.positions_to_call):
