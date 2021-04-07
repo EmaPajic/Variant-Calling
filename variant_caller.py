@@ -4,13 +4,13 @@ class VariantCaller(object):
     def __init__(self):
         pass
 
-    def __calculate_most_probable_variant__(self, candidate_variant_count, error_probability):
+    def __calculate_most_probable_variant__(self, candidate_variant_count, correct_probability):
         """
         Given two most common variants v and v', we want to calculate the likelihood of each possible variant
         P(variant | reads) = P(reads | variant) * P(variant) / P(reads)
             => P(variant | reads) is proportional to P(reads | variant) if we ignore P(variant)
         
-        If we have k v' bases and n-k v bases, and the error probability for one read position of p:   
+        If we have k v bases and n-k v' bases, and the correct probability for one read position of p:   
             P(reads | variant is v) = C_nk * p^k * (1 - p)^(n-k)
             P(reads | variant is v') = C_nk * p^(n - k) * (1 - p)^(n - k)
             P(reads | variant is vv') = C_nk / 2^n 
@@ -23,10 +23,10 @@ class VariantCaller(object):
         first_candidate_variant, first_candidate_variant_count = candidate_variant_count[0]
         second_candidate_variant, second_candidate_variant_count = candidate_variant_count[1]
         n = first_candidate_variant_count + second_candidate_variant_count
-        k = second_candidate_variant_count
+        k = first_candidate_variant_count
 
-        first_variant_log_likelihood = k * np.log(error_probability) + (n - k) * np.log(1 - error_probability)
-        second_variant_log_likelihood = (n - k) * np.log(error_probability) + k * np.log(1 - error_probability)
+        first_variant_log_likelihood = k * np.log(correct_probability) + (n - k) * np.log(1 - correct_probability)
+        second_variant_log_likelihood = (n - k) * np.log(correct_probability) + k * np.log(1 - correct_probability)
         diploidy_log_likelihood = n * np.log(0.5)
         total_likelihood = np.exp(first_variant_log_likelihood) + np.exp(second_variant_log_likelihood) + np.exp(diploidy_log_likelihood)
 
@@ -38,10 +38,9 @@ class VariantCaller(object):
             return ([first_candidate_variant, second_candidate_variant], np.exp(diploidy_log_likelihood) / total_likelihood)
         
 
-    def call_variant(self, genomePositionInfo, error_probability = None):
-        if error_probability == None:
-            # Deduce error probability from quality
-            error_probability = 0.001
+    def call_variant(self, genomePositionInfo, correct_probability = None):
+        if correct_probability == None:
+            correct_probability = 0.99
         
         variant_count = { (base, 'SNV'): genomePositionInfo[base] for base in {'A', 'G', 'C', 'T'} }
         if 'insertions' in genomePositionInfo:
@@ -55,7 +54,7 @@ class VariantCaller(object):
         candidate_variants = sorted(variant_count, key=variant_count.get, reverse=True)[:2]
         candidate_variant_count = [(variant, variant_count[variant]) for variant in candidate_variants]
 
-        most_probable_variant, confidence = self.__calculate_most_probable_variant__(candidate_variant_count, error_probability)
+        most_probable_variant, confidence = self.__calculate_most_probable_variant__(candidate_variant_count, correct_probability)
 
         ref_variant_present = len([variant[0] for variant in most_probable_variant if variant[0] == genomePositionInfo['ref_base']]) == 1
         alt_variants = [variant[0] for variant in most_probable_variant if variant[0] != genomePositionInfo['ref_base']]
