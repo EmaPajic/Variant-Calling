@@ -6,7 +6,7 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description='Runs variant calling on pileup file and stores in vfc file')
-    parser.add_argument('--use-read-quality', default='False', action='store_true',
+    parser.add_argument('--use-read-quality', default=False, action='store_true',
                         help='tells the algorithm to estimate p from read qualities')
     parser.add_argument('--call-less-positions', default=False, action='store_true',
                         help='tells the program to call less positions (not whole pileup file)')

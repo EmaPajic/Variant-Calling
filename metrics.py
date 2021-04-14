@@ -59,9 +59,12 @@ def get_statistics(bfctools_vcf_file, vcf_file):
     
 if __name__ == '__main__':
     bcftools_vcf_file = "merged-normal.bam.mpileup.vcf.called.vcf"
-    vcf_files = ["merged-normal.pileup.50.vcf", "merged-normal.pileup.60.vcf",
-                 "merged-normal.pileup.70.vcf", "merged-normal.pileup.80.vcf",
-                 "merged-normal.pileup.90.vcf"]
+    vcf_files = ["merged-normal.pileup.50.vcf", "merged-normal.pileup.55.vcf",
+                 "merged-normal.pileup.60.vcf", "merged-normal.pileup.65.vcf",
+                 "merged-normal.pileup.70.vcf", "merged-normal.pileup.75.vcf",
+                 "merged-normal.pileup.80.vcf", "merged-normal.pileup.85.vcf",
+                 "merged-normal.pileup.90.vcf", "merged-normal.pileup.95.vcf",
+                 "merged-normal.pileup.100.vcf"]
     p = []
     
     for vcf_file in vcf_files:
