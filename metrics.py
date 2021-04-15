@@ -102,12 +102,14 @@ if __name__ == '__main__':
         print('MCC score: {}'.format(mcc_list[i]))
         print('')
         
-        confusion_matrix = np.array([[tn, fn],[fp, tp]])
+        confusion_matrix = np.array([[TN[i], FN[i]],[FP[i], TP[i]]])
         df_cm = pd.DataFrame(confusion_matrix, range(2), range(2))
         plt.figure(i)
         sn.set(font_scale=1.4)
-        sn.heatmap(df_cm, annot=True, annot_kws={"size": 16})
+        ax = sn.heatmap(df_cm, annot=True, annot_kws={"size": 16}, fmt="d", cmap="YlGnBu")
         
+        ax.set(xlabel='Predicted', ylabel='True')
+
         plt.show() 
     
     plt.figure('Metrics')
@@ -119,6 +121,6 @@ if __name__ == '__main__':
     plt.plot(p, f1_score_list, label = 'F1 score')
     plt.plot(p, accuracy_list, label = 'Accuracy')
     plt.plot(p, mcc_list, label = 'MCC score')
-    plt.legend(loc = 'upper right')
+    plt.legend(loc = 'lower left')
     plt.show()
     
