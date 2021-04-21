@@ -52,22 +52,22 @@ class TestVariantCaller(unittest.TestCase):
     def test_normal(self):
         variant_caller = VariantCaller()
         mockPositionInfo = { 'A' : 8, 'G' : 1, 'C' : 1, 'T' : 1 , 'ref_base' : 'A'}
-        variant_caller.call_variant(mockPositionInfo, 0.2)
+        variant_caller.call_variant(mockPositionInfo, 0.8)
         self.assertEqual(mockPositionInfo['alts'],'.')
     
-        mockPositionInfo = { 'A' : 1, 'G' : 2, 'C' : 1, 'T' : 8 , 'ref_base' : 'G'}
-        variant_caller.call_variant(mockPositionInfo)
+        mockPositionInfo = { 'A' : 1, 'G' : 7, 'C' : 1, 'T' : 8 , 'ref_base' : 'G'}
+        variant_caller.call_variant(mockPositionInfo, 0.8)
         self.assertEqual(mockPositionInfo['genotype'],(0, 1))
         self.assertEqual(mockPositionInfo['alts'],['T'])
     
-        mockPositionInfo = { 'A' : 1, 'G' : 2, 'C' : 1, 'T' : 8 , 'ref_base' : 'A'}
-        variant_caller.call_variant(mockPositionInfo)
+        mockPositionInfo = { 'A' : 1, 'G' : 7, 'C' : 1, 'T' : 8 , 'ref_base' : 'A'}
+        variant_caller.call_variant(mockPositionInfo, 0.8)
         self.assertEqual(mockPositionInfo['genotype'],(1, 2))
         self.assertEqual(mockPositionInfo['alts'],['T', 'G'])
     
     def test_indels(self):
         def test_one_insert(variant_caller):
-            mockPositionInfo = { 'A' : 1, 'G': 2, 'C' : 1, 'T' : 1, \
+            mockPositionInfo = { 'A' : 1, 'G': 7, 'C' : 1, 'T' : 1, \
                                 'ref_base' : 'G', 'insertions': [('ACAC', 8)]}
             variant_caller.call_variant(mockPositionInfo)
             self.assertEqual(mockPositionInfo['genotype'], (0, 1))
@@ -75,7 +75,7 @@ class TestVariantCaller(unittest.TestCase):
             self.assertEqual(mockPositionInfo['ref_base'], 'G')
 
         def test_one_snv_one_insert(variant_caller):
-            mockPositionInfo = { 'A' : 1, 'G': 2, 'C' : 1, 'T' : 1, \
+            mockPositionInfo = { 'A' : 1, 'G': 7, 'C' : 1, 'T' : 1, \
                                 'ref_base' : 'A', 'insertions': [('ACAC', 8)]}
             variant_caller.call_variant(mockPositionInfo)
             self.assertEqual(mockPositionInfo['genotype'], (1, 2))
@@ -84,14 +84,14 @@ class TestVariantCaller(unittest.TestCase):
         
         def test_two_inserts(variant_caller):
             mockPositionInfo = { 'A' : 1, 'G': 1, 'C' : 1, 'T' : 1, \
-                                'ref_base' : 'A', 'insertions': [('ACAC', 8), ('GTGT', 2)]}
+                                'ref_base' : 'A', 'insertions': [('ACAC', 8), ('GTGT', 7)]}
             variant_caller.call_variant(mockPositionInfo)
             self.assertEqual(mockPositionInfo['genotype'], (1, 2))
             self.assertEqual(mockPositionInfo['alts'], ['AACAC', 'AGTGT'])
             self.assertEqual(mockPositionInfo['ref_base'], 'A')
         
         def test_one_delete(variant_caller):
-            mockPositionInfo = { 'A' : 1, 'G': 2, 'C' : 1, 'T' : 1, \
+            mockPositionInfo = { 'A' : 1, 'G': 7, 'C' : 1, 'T' : 1, \
                                 'ref_base' : 'G', 'deletitions': [('ACAC', 8)]}
             variant_caller.call_variant(mockPositionInfo)
             self.assertEqual(mockPositionInfo['genotype'], (0, 1))
@@ -99,7 +99,7 @@ class TestVariantCaller(unittest.TestCase):
             self.assertEqual(mockPositionInfo['ref_base'], 'GACAC')
         
         def test_one_delete_one_snv(variant_caller):
-            mockPositionInfo = { 'A' : 1, 'G': 2, 'C' : 1, 'T' : 1, \
+            mockPositionInfo = { 'A' : 1, 'G': 7, 'C' : 1, 'T' : 1, \
                                 'ref_base' : 'A', 'deletitions': [('ACAC', 8)]}
             variant_caller.call_variant(mockPositionInfo)
             self.assertEqual(mockPositionInfo['genotype'], (1, 2))
@@ -108,7 +108,7 @@ class TestVariantCaller(unittest.TestCase):
         
         def test_one_delete_one_insert(variant_caller):
             mockPositionInfo = { 'A' : 1, 'G': 1, 'C' : 1, 'T' : 1, \
-                                'ref_base' : 'T', 'deletitions': [('ACAC', 8)], 'insertions' : [('GT', 2)]}
+                                'ref_base' : 'T', 'deletitions': [('ACAC', 8)], 'insertions' : [('GT', 7)]}
             variant_caller.call_variant(mockPositionInfo)
             self.assertEqual(mockPositionInfo['genotype'], (1, 2))
             self.assertEqual(mockPositionInfo['alts'], ['T', 'TGTACAC'])
@@ -116,7 +116,7 @@ class TestVariantCaller(unittest.TestCase):
 
         def test_two_deletes(variant_caller):
             mockPositionInfo = { 'A' : 1, 'G': 1, 'C' : 1, 'T' : 1, \
-                                'ref_base' : 'T', 'deletitions': [('ACAC', 8), ('AC', 2)]}
+                                'ref_base' : 'T', 'deletitions': [('ACAC', 8), ('AC', 7)]}
             variant_caller.call_variant(mockPositionInfo)
             self.assertEqual(mockPositionInfo['genotype'], (1, 2))
             self.assertEqual(mockPositionInfo['alts'], ['T', 'TAC'])
