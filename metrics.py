@@ -102,7 +102,7 @@ if __name__ == '__main__':
         print('MCC score: {}'.format(mcc_list[i]))
         print('')
         
-        confusion_matrix = np.array([[TN[i], FN[i]],[FP[i], TP[i]]])
+        confusion_matrix = np.array([[TN[i], FP[i]],[FN[i], TP[i]]])
         df_cm = pd.DataFrame(confusion_matrix, range(2), range(2))
         plt.figure(i)
         sn.set(font_scale=1.4)
