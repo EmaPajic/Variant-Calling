@@ -108,6 +108,8 @@ def metrics(bcftools_vcf_file, vcf_files):
     f1_score_list = []
     accuracy_list = []
     mcc_list = []
+    predicted_variants = []
+    true_variants = []
     
     for vcf_file in vcf_files:
         tp, fp, fn, tn = get_statistics(bcftools_vcf_file, vcf_file)
@@ -115,6 +117,8 @@ def metrics(bcftools_vcf_file, vcf_files):
         FP.append(fp)
         FN.append(fn)
         TN.append(tn)
+        predicted_variants.append(tp + fp)
+        true_variants.append(tp + fn)
         precision_list.append(precision(tp, fp, fn))
         recall_list.append(recall(tp, fp, fn))
         f1_score_list.append(f1_score(tp, fp, fn))
@@ -150,6 +154,15 @@ def metrics(bcftools_vcf_file, vcf_files):
     plt.plot(p, accuracy_list, label = 'Accuracy')
     plt.plot(p, mcc_list, label = 'MCC score')
     plt.legend(loc = 'lower left')
+    plt.show()
+    
+    plt.figure('Variants')
+    plt.title('Variants')
+    plt.xlabel('Probability')
+    plt.ylabel('Number of variants')
+    plt.plot(p, predicted_variants, label = 'Predicted variants')
+    plt.plot(p, true_variants, label = 'True variants')
+    plt.legend(loc = 'lower right')
     plt.show()
     
 if __name__ == '__main__':
