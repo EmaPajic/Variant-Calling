@@ -4,7 +4,18 @@ from collections import Counter
 
 def preprocess_bases(read_bases):
     """ Returns read without irrelevant characters
+    
+    Parameters
+    ----------
+    read_bases: str
+        Read results for a certain position
+        
+    Returns
+    -------
+    str
+        Preprocessed read results
     """
+    
     read_bases = read_bases.upper().replace(',', '.')
     read_bases = re.sub('\^.', '', read_bases)
     read_bases = re.sub('\$|\*','',read_bases)
@@ -12,13 +23,35 @@ def preprocess_bases(read_bases):
 
 def count_bases(read_bases):
     """ Returns count of every base
+    
+    Parameters
+    ----------
+    read_bases: str
+        Read results for a certain position
+        
+    Returns
+    -------
+    collections.Counter
+        Count of each base
     """
+    
     base_counter = Counter(read_bases).most_common() 
     return base_counter
 
 def get_average_quality(qualities):
     """ Calculates average quality as Phred quality score
+    
+    Parameters
+    ----------
+    qualities: str
+        Read qualities for a certain position
+    
+    Returns
+    -------
+    float
+        Average quality
     """
+    
     sum_quality = 0
     
     for q in qualities:
@@ -27,8 +60,19 @@ def get_average_quality(qualities):
     return sum_quality / len(qualities)
 
 def get_indel_string(read_bases):
-    """ Returns actual indel string
+    """ Returns actual indel string, without number of repetitions
+    
+    Parameters
+    ----------
+    read_bases: str
+        Read results for a certain position
+        
+    Returns
+    -------
+    str
+        Actual indel string
     """
+    
     indel_string = read_bases[2:]
     
     ind_num = [ind.end() for ind in (re.finditer(r'[A-Za-z\.,][0-9]*[^A-Za-z]', read_bases))]
@@ -57,9 +101,20 @@ def get_indel_string(read_bases):
 
 def pileup_reader(path):
     """ Reads pileup file, removes irrelevant characters from read, 
-        counts bases, detects insertions and deletions and returnes 
-        a dictionary with all relevant information.
+    counts bases, detects insertions and deletions and returnes a dictionary
+    with all relevant information.
+        
+    Parameters
+    ----------
+    path: str
+        Path to the pileup file
+        
+    Yields
+    ------
+    dict
+        A dictionary containing pileup line information
     """
+    
     with open(path, 'r') as pileup_file:
         i = 0
         for line in pileup_file.readlines():

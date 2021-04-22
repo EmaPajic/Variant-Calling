@@ -5,6 +5,12 @@ import time
 import argparse
 
 def main():
+    """  Parses command line arguments, creates VCF file, goes through lines
+    in pileup file, calls variant for each pileup line and writes them to VCF 
+    file
+    """ 
+    
+    # parse command line arguments
     parser = argparse.ArgumentParser(description='Runs variant calling on pileup file and stores in vfc file')
     parser.add_argument('--use-read-quality', default=False, action='store_true',
                         help='tells the algorithm to estimate p from read qualities')
@@ -24,7 +30,8 @@ def main():
     
     variant_caller = VariantCaller()
     sample = 'SAMPLE1'
-
+    
+    # creates vcf file
     create_vcf_start = time.time()
     vcf = create_vcf_file(args.output_file, sample)
     create_vcf_end = time.time()
@@ -37,12 +44,14 @@ def main():
     write_vcf_time = 0
 
     for pileup_line in pileup_reader(args.input_file):
+        # calls variant for each pileup line
         variant_caller_start = time.time()
         variant_caller.call_variant(pileup_line, args.p, args.use_read_quality)
         if pileup_line['alts'] != '.':
             positions_with_variants += 1
         variant_caller_time += time.time() - variant_caller_start
 
+        # writes line in VCF file
         write_vcf_start = time.time()
         write_vcf_line(pileup_line, vcf, sample)
         write_vcf_time = time.time() - write_vcf_start

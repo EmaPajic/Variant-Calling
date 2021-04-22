@@ -43,7 +43,7 @@ class TestPileupReader(unittest.TestCase):
                         'insertions': [], 'deletitions': [['A', 1]]})
     
         i = 0
-        for item in pileup_reader('test.pileup'):
+        for item in pileup_reader('test_data/test.pileup'):
             self.assertEqual(item, pileup_lines[i])
             i += 1
     
