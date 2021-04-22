@@ -3,7 +3,19 @@ import datetime
 
 def create_vcf_file(path, sample):
     """ Creates VCF header and Variant File. 
-        Writes VCF header in Variant File and returns it. 
+    Writes VCF header in Variant File and returns it. 
+        
+    Parameters
+    ----------
+    path: str
+        Name and path of an output vcf file, for example output/out.vcf
+    sample: str
+        Name of a sample to add to the VCF file
+    
+    Returns
+    -------
+    pysam.VariantFile
+        Created VCF file with header written in it
     """
     vcf_header = pysam.VariantHeader()
     vcf_header.add_sample(sample)
@@ -27,6 +39,18 @@ def create_vcf_file(path, sample):
     return vcf
 
 def write_vcf_line(pileup_record, vcf, sample): 
+    """ Writes a line from a pileup record for a given sample to given vcf file.
+    
+    Parameters
+    ----------
+    pileup_record: str
+        Line of a pileup file to be written to VCF
+    vcf: pysam.VariantFile
+        VCF file where to write
+    sample: str
+        Name of a sample in the VCF file
+    
+    """
     record = vcf.header.new_record()
     record.contig = pileup_record['chromosome']
     record.pos = pileup_record['position']
