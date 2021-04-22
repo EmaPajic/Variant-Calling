@@ -15,6 +15,7 @@ def preprocess_bases(read_bases):
     str
         Preprocessed read results
     """
+    
     read_bases = read_bases.upper().replace(',', '.')
     read_bases = re.sub('\^.', '', read_bases)
     read_bases = re.sub('\$|\*','',read_bases)
@@ -33,6 +34,7 @@ def count_bases(read_bases):
     collections.Counter
         Count of each base
     """
+    
     base_counter = Counter(read_bases).most_common() 
     return base_counter
 
@@ -49,6 +51,7 @@ def get_average_quality(qualities):
     float
         Average quality
     """
+    
     sum_quality = 0
     
     for q in qualities:
@@ -69,6 +72,7 @@ def get_indel_string(read_bases):
     str
         Actual indel string
     """
+    
     indel_string = read_bases[2:]
     
     ind_num = [ind.end() for ind in (re.finditer(r'[A-Za-z\.,][0-9]*[^A-Za-z]', read_bases))]
@@ -110,6 +114,7 @@ def pileup_reader(path):
     dict
         A dictionary containing pileup line information
     """
+    
     with open(path, 'r') as pileup_file:
         i = 0
         for line in pileup_file.readlines():

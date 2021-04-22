@@ -17,6 +17,7 @@ def create_vcf_file(path, sample):
     pysam.VariantFile
         Created VCF file with header written in it
     """
+    
     vcf_header = pysam.VariantHeader()
     vcf_header.add_sample(sample)
     
@@ -51,6 +52,7 @@ def write_vcf_line(pileup_record, vcf, sample):
         Name of a sample in the VCF file
     
     """
+    
     record = vcf.header.new_record()
     record.contig = pileup_record['chromosome']
     record.pos = pileup_record['position']
