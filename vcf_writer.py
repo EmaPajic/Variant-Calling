@@ -13,7 +13,7 @@ def create_vcf_file(path, sample):
     vcf_header.add_line('##fileDate=' + date)
     vcf_header.add_line('##source=Ema&Nikola')                    
     
-    faifile = open("human_g1k_v37_decoy.fasta.fai")
+    faifile = open("test_data/human_g1k_v37_decoy.fasta.fai")
     for line in faifile:
             split_line = line.split("\t")
             contig = '##contig=<ID=' + str(split_line[0]) + ', length=' + str(split_line[1]) + '>'
