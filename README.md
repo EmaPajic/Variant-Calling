@@ -1,6 +1,6 @@
 ## Binomial Variant Caller from Pileup
 
-This repo contains an implementation of a simple Variant Calling algorithm that assumes that nucleotide counts at one pileup position follow the same **Binomial** distribution, and uses **Maximum Likelihood Estimation (MLE)** for calling the variants.
+This repo contains an implementation of a simple Variant Calling algorithm that assumes that nucleotide counts at one pileup position follow the same **Binomial** distribution and uses **Maximum Likelihood Estimation (MLE)** for calling the variants.
 
 [Youtube presentation](https://www.youtube.com/watch?v=TCuiXotgKk0&ab_channel=nikolaaleksic)
 
@@ -36,7 +36,7 @@ Genomic variants can be simple, one example are single nucleotide variants (SNVs
 <img src=images/genomic_variants.png>
 
 Before identifying variants, we need to read the actual genome we want to analyze.
-Unfortunately, there isn't a method to read the whole genome in one go, so DNA is read by fragmenting the genome into millions of molecules, and reading shorter [reads](https://en.wikipedia.org/wiki/Read_(biology)) instead. The reads are then aligned to reconstruct the whole genome.
+Unfortunately, there isn't a method to read the whole genome in one go, so DNA is read by fragmenting the genome into millions of molecules and reading shorter [reads](https://en.wikipedia.org/wiki/Read_(biology)) instead. The reads are then aligned to reconstruct the whole genome.
 </br>
 </br>
 The algorithm implemented in this repo identifies variants by looking at only one position at a time, for what the pileup format is perfect for.
@@ -47,7 +47,7 @@ The algorithm implemented in this repo identifies variants by looking at only on
 
 After we have constrained the analysis to only one sequence position, we want to count how many of each **AGCT** letter and each **INDEL (insertion/deletition)** is at that position.
 </br>
-We will assume diploidy, hence there are at most two variants at one position. We will select between all letters and indels two with the largest count, remember their counts, and discard others.
+We will assume diploidy, hence there are at most two variants at one position. We will select between all letters and indels two with the largest count, remember their counts and discard others.
 </br>
 </br>
 To simplify, let's call them letters **a** and **b**, with counts **n<sub>a</sub>** and **n<sub>b</sub>**.
@@ -60,16 +60,16 @@ We will use the **Maximum Likelihood (MLE)** estimation to select the variants.
 **MLE** ignores **P(variant)**, and chooses the most probable one by maximizing **P(counts|variant)**, *the likelihood function*.
 </br>
 </br>
-All nucleotides at one position are either correct given the variant, or an error due to read extraction process. We will assume that all nucleotides are correct with probability **p**, and are independent of each other. There are three cases:
+All nucleotides at one position are either correct given the variant, or an error due to read extraction process. We will assume that all nucleotides are correct with probability **p** and are independent of each other. There are three cases:
 
 * Variant is **aa**, **n<sub>a</sub>** nucleotides are correct. Likelihood function is given by [Binomial distribution](https://en.wikipedia.org/wiki/Binomial_distribution) with parameters **n<sub>a</sub>** + **n<sub>b</sub>** and **p**, at position **n<sub>a</sub>**.
 * Variant is **bb**, **n<sub>b</sub>** nucleotides are correct. Likelihood function is given by Binomial distribution with parameters **n<sub>a</sub>** + **n<sub>b</sub>** and **p**, at position **n<sub>b</sub>**.
-* Variant is **ab**, all nucleotides are correct. We found that it is suboptimal to blend **a** and **b** into one correct letter, and have the likelihood function be equal to the same Binomial distribution at position **n<sub>a</sub>** + **n<sub>b</sub>**, because this option would be picked too often. To reduce that, we assumed that **a** and **b** should appear with equal probability **1/2**, and calculated the likelihood as probability that the counts are **n<sub>a</sub>** and **n<sub>b</sub>** in that setting.
+* Variant is **ab**, all nucleotides are correct. We found that it is suboptimal to blend **a** and **b** into one correct letter and have the likelihood function be equal to the same Binomial distribution at position **n<sub>a</sub>** + **n<sub>b</sub>**, because this option would be picked too often. To reduce that, we assumed that **a** and **b** should appear with equal probability **1/2** and calculated the likelihood as probability that the counts are **n<sub>a</sub>** and **n<sub>b</sub>** in that setting.
 
 After calculating the likelihoods, we will pick the most likely variant! That variant is compared to the referent genome, to determine the `genotype` and the `'alts'` field to store in the `VCF 4.2 format` output file. 
 ## Results
 
-We used `merged-normal.bam` from [Seven Bridges Cancer Genomics Cloud ](https://www.cancergenomicscloud.org/) to test the algorithm. We produced `merged-normal.pileup` using `Bcftools Mpileup tool`, and compared our called variants with variants produces by `Bcftools Call tool`.
+We used `merged-normal.bam` from [Seven Bridges Cancer Genomics Cloud ](https://www.cancergenomicscloud.org/) to test the algorithm. We produced `merged-normal.pileup` using `Bcftools Mpileup tool` and compared our called variants with variants produces by `Bcftools Call tool`.
 </br>
 </br>
 Having or not having a variant at one position in the `Bcftools Call tool` output will be our true/false labels, and comparing the output of our algorithm gives us `true positives`, `true negatives`, `false positives` and `false negatives`, which are used to calculate standard metrics.
