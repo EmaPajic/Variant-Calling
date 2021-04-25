@@ -1,6 +1,6 @@
 ## Binomial Variant Caller from Pileup
 
-This repo contains an implementation of a simple Variant Calling algorithm that assumes that nucleotide counts at one pileup position follow the same **Binomial** distrubution, and uses **Maximum Likelihood Estimation (MLE)** for calling the variants.
+This repo contains an implementation of a simple Variant Calling algorithm that assumes that nucleotide counts at one pileup position follow the same **Binomial** distribution, and uses **Maximum Likelihood Estimation (MLE)** for calling the variants.
 
 [Youtube presentation](https://www.youtube.com/watch?v=TCuiXotgKk0&ab_channel=nikolaaleksic)
 
